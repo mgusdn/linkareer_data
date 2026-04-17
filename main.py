@@ -7,7 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time, json, re, urllib.parse
 
 KEYWORD    = "백엔드 개발자"
-OUTPUT     = "cover_letters.jsonl"
+OUTPUT     = "linkareer_backend_developer.jsonl"
 
 def get_driver(headless=False):
     options = webdriver.ChromeOptions()
@@ -112,10 +112,12 @@ def parse_cover_letter(driver, url, keyword):
         # 문항 + 답변 파싱
         body = driver.find_element(By.TAG_NAME, "body").text
 
-        match = re.search(r'문장 스크랩\n[-]+\n복사\n[-]+\n공유\n(.+?)\n새창', body, re.DOTALL)
-        content = match.group(1).strip() if match else body
+        # "Copyright © Linkareer Inc. All Rights Reserved." 이후가 실제 자소서 본문
+        boundary = re.search(r'Copyright © Linkareer Inc\. All Rights Reserved\.\n(.+)', body, re.DOTALL)
+        content = boundary.group(1).strip() if boundary else body
 
         numbered = re.split(r'\n(?=\d+\.\s)', content)
+
         if len(numbered) > 1:
             for section in numbered:
                 lines = section.strip().split("\n", 1)
