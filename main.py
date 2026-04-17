@@ -124,12 +124,16 @@ def parse_cover_letter(driver, url, keyword):
                 if len(lines) == 2 and re.match(r'^\d+\.', lines[0]):
                     data["questions"].append({
                         "question": lines[0].strip(),
-                        "answer":   lines[1].strip()
+                        "answer":   re.sub(r'\n새창\n목록$', '', lines[1].strip())
                     })
         else:
+            free_boundary = re.search(r'다시보지 않기\n(.+)', content, re.DOTALL)
+            free_content = free_boundary.group(1).strip() if free_boundary else content.strip()
+            free_content = re.sub(r'^자세히 알아보기\n.+?\n\n', '', free_content, flags=re.DOTALL)
+            free_content = re.sub(r'^\s*(?:\[자유[^\]\n]*\]|<자유[^>\n]*>|자유 항목)\n+', '', free_content)
             data["questions"].append({
                 "question": "[자유양식]",
-                "answer":   content.strip()
+                "answer":   re.sub(r'\n새창\n목록$', '', free_content.strip())
             })
 
     except Exception as e:
