@@ -20,7 +20,10 @@ python main.py "백엔드 개발자"
 python main.py "백엔드 개발자" -o my_output.jsonl
 
 # 2단계: JSONL → 엑셀 변환
-python jsonl_to_exel.py
+python jsonl_to_exel.py 백엔드_개발자.jsonl
+
+# 출력 파일명을 직접 지정하고 싶을 때
+python jsonl_to_exel.py 백엔드_개발자.jsonl -o output.xlsx
 ```
 
 ## 파일 구조
@@ -68,14 +71,26 @@ linkareer_data/
 
 ## 옵션
 
-| 인자 | 설명 |
-|---|---|
-| `keyword` (필수) | 검색할 직무 키워드 |
-| `-o`, `--output` | 출력 JSONL 파일 경로 (생략 시 `키워드.jsonl` 자동 생성) |
+### main.py
+
+| 인자 | 필수 | 설명 |
+|---|---|---|
+| `keyword` | O | 검색할 직무 키워드 |
+| `-o`, `--output` | X | 출력 JSONL 파일 경로 (생략 시 `키워드.jsonl` 자동 생성) |
 
 ```bash
-# 도움말 확인
 python main.py --help
+```
+
+### jsonl_to_exel.py
+
+| 인자 | 필수 | 설명 |
+|---|---|---|
+| `input` | O | 변환할 JSONL 파일 경로 |
+| `-o`, `--output` | X | 출력 엑셀 파일 경로 (생략 시 입력 파일명`.xlsx` 자동 생성) |
+
+```bash
+python jsonl_to_exel.py --help
 ```
 
 ## 주의 사항
