@@ -4,10 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time, json, re, urllib.parse
-
-KEYWORD    = "백엔드 개발자"
-OUTPUT     = "linkareer_backend_developer.jsonl"
+import time, json, re, urllib.parse, argparse
 
 def get_driver(headless=False):
     options = webdriver.ChromeOptions()
@@ -141,24 +138,24 @@ def parse_cover_letter(driver, url, keyword):
 
     return data
 
-def main():
+def main(keyword, output):
     driver = get_driver(headless=False)
 
     try:
-        print(f"\n검색어: {KEYWORD}")
+        print(f"\n검색어: {keyword}")
         print("=" * 50)
 
         print("\n[1단계] 자소서 링크 전체 수집...")
-        links = get_all_links(driver, KEYWORD)
+        links = get_all_links(driver, keyword)
         print(f"총 {len(links)}개 링크 수집 완료\n")
 
-        print(f"[2단계] 상세 페이지 수집 → {OUTPUT}")
+        print(f"[2단계] 상세 페이지 수집 → {output}")
         success, fail = 0, 0
 
-        with open(OUTPUT, "w", encoding="utf-8") as f:
+        with open(output, "w", encoding="utf-8") as f:
             for idx, link in enumerate(links, 1):
                 print(f"  [{idx:02d}/{len(links)}] {link}", end=" ... ", flush=True)
-                result = parse_cover_letter(driver, link, KEYWORD)
+                result = parse_cover_letter(driver, link, keyword)
                 if result:
                     f.write(json.dumps(result, ensure_ascii=False) + "\n")
                     success += 1
@@ -168,10 +165,18 @@ def main():
                     print("실패")
                 time.sleep(2.5)
 
-        print(f"\n완료: 성공 {success}건 / 실패 {fail}건 → {OUTPUT}")
+        print(f"\n완료: 성공 {success}건 / 실패 {fail}건 → {output}")
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="링커리어 자소서 수집기")
+    parser.add_argument("keyword", help="검색할 직무 키워드 (예: '백엔드 개발자')")
+    parser.add_argument("-o", "--output", help="출력 파일 경로 (기본값: 키워드 기반 자동 생성)")
+    args = parser.parse_args()
+
+    KEYWORD = args.keyword
+    OUTPUT  = args.output if args.output else args.keyword.replace(" ", "_") + ".jsonl"
+
+    main(KEYWORD, OUTPUT)
